@@ -24,6 +24,7 @@ ext {
     kotlin_utils_version = '0.0.11-SNAPSHOT'
     me_message_subscriber_version = '1.0.1-SNAPSHOT'
     azure_storage_version = '4.0.0'
+    gson_version = '2.6.2'
 }
 
 dependencies {
@@ -31,6 +32,7 @@ dependencies {
     compile "org.bitbucket.lykke:kotlin-utils:$rootProject.ext.kotlin_utils_version"
     compile "org.bitbucket.lykke:me-message-subscriber:$rootProject.ext.me_message_subscriber_version"
     compile "com.microsoft.azure:azure-storage:$rootProject.ext.azure_storage_version"
+    compile "com.google.code.gson:gson:$rootProject.ext.gson_version"
 }
 
 compileKotlin {
