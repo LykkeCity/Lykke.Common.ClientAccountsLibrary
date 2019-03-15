@@ -1,21 +1,21 @@
 package com.lykke.client.accounts
 
-class ClientAccountCache(initialData: Map<String, String>) {
+class ClientAccountsCacheImpl(initialData: Map<String, String>): ClientAccountsCache {
     private val clientIdByWalletId = HashMap<String, String>()
 
     init {
         clientIdByWalletId.putAll(initialData)
     }
 
-    fun delete(walletId: String) {
+    internal fun delete(walletId: String) {
         clientIdByWalletId.remove(walletId)
     }
 
-    fun add(clientId: String, walletId: String) {
+    internal fun add(clientId: String, walletId: String) {
         clientIdByWalletId[walletId] = clientId
     }
 
-    fun getClientByWalletId(walletId: String): String? {
+    override fun getClientByWalletId(walletId: String): String? {
         return clientIdByWalletId[walletId]
     }
 }
