@@ -24,6 +24,8 @@ ext {
     kotlin_utils_version = '0.0.11-SNAPSHOT'
     azure_storage_version = '4.0.0'
     gson_version = '2.6.2'
+    jedis_version = '2.9.0'
+    junit_version = '4.12'
 }
 
 dependencies {
@@ -31,6 +33,9 @@ dependencies {
     compile "org.bitbucket.lykke:kotlin-utils:$rootProject.ext.kotlin_utils_version"
     compile "com.microsoft.azure:azure-storage:$rootProject.ext.azure_storage_version"
     compile "com.google.code.gson:gson:$rootProject.ext.gson_version"
+    compile "redis.clients:jedis:$rootProject.ext.jedis_version"
+
+    testCompile  "junit:junit:$rootProject.ext.junit_version"
 }
 
 compileKotlin {

@@ -2,9 +2,9 @@ package com.lykke.client.accounts
 
 import com.lykke.client.accounts.config.Config
 import com.lykke.client.accounts.config.RabbitMqConfig
-import com.lykke.client.accounts.http.impl.ClientAccountsHttpClientImpl
-import com.lykke.client.accounts.http.impl.HttpCleintImpl
 import com.lykke.client.accounts.rabbitmq.RabbitMqListenersFactory
+import com.lykke.client.accounts.redis.ClientAccountsRedisDbAccessor
+import com.lykke.client.accounts.redis.JedisConnectionFactory
 import java.util.function.Consumer
 
 class ClientAccountCacheFactory {
@@ -14,15 +14,17 @@ class ClientAccountCacheFactory {
         @Synchronized
         fun get(config: Config): ClientAccountsCache {
             val clientAccountCache = CLIENT_ACCOUNT_CACHE_BY_CONFIG.getOrPut(config) {
-                val httpClient = ClientAccountsHttpClientImpl(config.clientAccountsUrl, HttpCleintImpl())
+                val clientAccountsDbAccessor =
+                    ClientAccountsRedisDbAccessor(JedisConnectionFactory.get(config.redisConfig))
+                val httpClientAccountsClient = clientAccountsDbAccessor.getAllClientsWallets()
                 val clientIdByWalletId = HashMap<String, String>()
-                httpClient.getAllClientWallets().stream().flatMap { it.clients.stream() }
-                    .forEach { client ->
-                        client.wallets.forEach { walletId ->
-                            clientIdByWalletId[walletId] = client.clientId
+                httpClientAccountsClient.forEach { clientWalletsEntity ->
+                    clientWalletsEntity.walletIds.forEach { walletId ->
+                        run {
+                            clientIdByWalletId.put(walletId, clientWalletsEntity.clientId)
                         }
                     }
-
+                }
                 ClientAccountsCacheImpl(clientIdByWalletId)
             }
 
@@ -32,10 +34,13 @@ class ClientAccountCacheFactory {
         }
 
         fun shutdownAll() {
-            RabbitMqListenersFactory
+            RabbitMqListenersFactory.shutdownAll()
         }
 
-        private fun subscribeToClientAccountsUpdates(rabbitMqConfig: RabbitMqConfig, clientAccountCache: ClientAccountsCacheImpl) {
+        private fun subscribeToClientAccountsUpdates(
+            rabbitMqConfig: RabbitMqConfig,
+            clientAccountCache: ClientAccountsCacheImpl
+        ) {
             val rmqListener = RabbitMqListenersFactory.getListener(rabbitMqConfig)
             rmqListener.addListener(Consumer {
                 clientAccountCache.add(it.clientId, it.walletId)

@@ -18,8 +18,8 @@ import kotlin.concurrent.thread
 import com.lykke.utils.rabbit.RabbitMqConfig as UtilsRabbitMqConfig
 
 class ClientAccountsRmqListener(
-    val rabbitMqConfig: RabbitMqConfig,
-    val messageDeserializer: Deserializer<ClientAccountUpdateEvent>
+    private val rabbitMqConfig: RabbitMqConfig,
+    private val messageDeserializer: Deserializer<ClientAccountUpdateEvent>
 ) {
 
     private companion object {
