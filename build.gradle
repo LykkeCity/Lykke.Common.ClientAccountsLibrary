@@ -8,12 +8,14 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'maven'
+apply plugin: "com.google.protobuf"
 
 repositories {
     mavenCentral()
@@ -24,8 +26,8 @@ ext {
     kotlin_utils_version = '0.0.11-SNAPSHOT'
     azure_storage_version = '4.0.0'
     gson_version = '2.6.2'
-    jedis_version = '2.9.0'
     junit_version = '4.12'
+    protobuf_version = '3.6.0'
 }
 
 dependencies {
@@ -33,7 +35,7 @@ dependencies {
     compile "org.bitbucket.lykke:kotlin-utils:$rootProject.ext.kotlin_utils_version"
     compile "com.microsoft.azure:azure-storage:$rootProject.ext.azure_storage_version"
     compile "com.google.code.gson:gson:$rootProject.ext.gson_version"
-    compile "redis.clients:jedis:$rootProject.ext.jedis_version"
+    compile "com.google.protobuf:protobuf-java:$rootProject.ext.protobuf_version"
 
     testCompile  "junit:junit:$rootProject.ext.junit_version"
 }
@@ -42,6 +44,19 @@ compileKotlin {
     kotlinOptions {
         freeCompilerArgs = ['-Xjsr305=strict', '-Xno-param-assertions', '-Xno-call-assertions']
         jvmTarget = '1.8'
+    }
+}
+
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$rootProject.ext.protobuf_version"
+    }
+
+    generateProtoTasks.generatedFilesBaseDir = 'src'
+
+    generateProtoTasks {
+        ofSourceSet('main')
     }
 }
 

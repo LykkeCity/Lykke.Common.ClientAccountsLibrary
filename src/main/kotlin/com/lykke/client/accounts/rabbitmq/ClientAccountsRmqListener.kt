@@ -1,7 +1,7 @@
 package com.lykke.client.accounts.rabbitmq
 
 import com.lykke.client.accounts.config.RabbitMqConfig
-import com.lykke.client.accounts.incoming.ClientAccountUpdateEvent
+import com.lykke.client.accounts.incoming.ClientAccountMessages.WalletCreatedEvent as WalletCreatedEvent
 import com.lykke.utils.logging.ThrottlingLogger
 import com.lykke.utils.rabbit.Connector
 import com.lykke.utils.rabbit.ConsumerFactory
@@ -19,14 +19,14 @@ import com.lykke.utils.rabbit.RabbitMqConfig as UtilsRabbitMqConfig
 
 class ClientAccountsRmqListener(
     private val rabbitMqConfig: RabbitMqConfig,
-    private val messageDeserializer: Deserializer<ClientAccountUpdateEvent>
+    private val messageDeserializer: Deserializer<WalletCreatedEvent>
 ) {
 
     private companion object {
         val LOGGER = ThrottlingLogger.getLogger(ClientAccountsRmqListener::class.java.simpleName)
     }
 
-    private val listeners = CopyOnWriteArrayList<Consumer<ClientAccountUpdateEvent>>()
+    private val listeners = CopyOnWriteArrayList<Consumer<WalletCreatedEvent>>()
     private val eventsQueue: BlockingQueue<ByteArray> = rabbitMqConfig.queue ?: LinkedBlockingQueue<ByteArray>()
     private val rabbitMqSubscriber: RabbitMqSubscriber
     private var started = false
@@ -36,7 +36,7 @@ class ClientAccountsRmqListener(
         start()
     }
 
-    fun addListener(listener: Consumer<ClientAccountUpdateEvent>) {
+    fun addListener(listener: Consumer<WalletCreatedEvent>) {
         listeners.add(listener)
     }
 
