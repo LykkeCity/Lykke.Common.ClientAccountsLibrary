@@ -53,7 +53,7 @@ class ClientAccountsRmqListener(
     }
 
     fun close() {
-
+        rabbitMqSubscriber.shutdown()
     }
 
     private fun startEventProcessingLoop() {
@@ -73,23 +73,20 @@ class ClientAccountsRmqListener(
     }
 
     private fun getRabbitMqSubscriber(): RabbitMqSubscriber {
-        val tmpFactory = ConnectionFactory()
-        tmpFactory.setUri(rabbitMqConfig.uri)
 
         return RabbitMqSubscriber(UtilsRabbitMqConfig(
-            tmpFactory.host,
-            tmpFactory.port,
-            tmpFactory.username,
-            tmpFactory.password,
-            rabbitMqConfig.exchange,
-            rabbitMqConfig.queueName,
-            null
+            uri = rabbitMqConfig.uri,
+            exchange = rabbitMqConfig.exchange,
+            queue =  rabbitMqConfig.queueName,
+            connectionTryInterval = null
         ),
             object : Connector {
                 override fun createChannel(config: UtilsRabbitMqConfig): Channel {
                     val factory = ConnectionFactory()
-                    factory.host = config.host
-                    factory.port = config.port
+                    config.host?.let { factory.host = it }
+                    config.port?.let { factory.port = it }
+                    config.uri?.let { factory.setUri(it) }
+                    factory.setUri(config.uri)
                     factory.username = config.username
                     factory.password = config.password
                     factory.requestedHeartbeat = 30

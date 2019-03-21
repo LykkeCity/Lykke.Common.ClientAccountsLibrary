@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
+        classpath('io.swagger:swagger-codegen:2.2.3')
     }
 }
 
@@ -23,22 +24,14 @@ repositories {
 }
 
 ext {
-    kotlin_utils_version = '0.0.11-SNAPSHOT'
+    kotlin_utils_version = '0.0.12-SNAPSHOT'
     azure_storage_version = '4.0.0'
     gson_version = '2.6.2'
     junit_version = '4.12'
     protobuf_version = '3.6.0'
+    okhttp_version = '2.7.5'
 }
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.bitbucket.lykke:kotlin-utils:$rootProject.ext.kotlin_utils_version"
-    compile "com.microsoft.azure:azure-storage:$rootProject.ext.azure_storage_version"
-    compile "com.google.code.gson:gson:$rootProject.ext.gson_version"
-    compile "com.google.protobuf:protobuf-java:$rootProject.ext.protobuf_version"
-
-    testCompile  "junit:junit:$rootProject.ext.junit_version"
-}
 
 compileKotlin {
     kotlinOptions {
@@ -58,6 +51,78 @@ protobuf {
     generateProtoTasks {
         ofSourceSet('main')
     }
+}
+
+import io.swagger.codegen.DefaultGenerator
+import io.swagger.codegen.config.CodegenConfigurator
+
+def swaggerInput = "${rootDir}/src/main/swagger/clientAccountsApi.json"
+def swaggerOutputDir = file('build/swagger')
+
+task generateApi {
+    inputs.file(swaggerInput)
+    outputs.dir(swaggerOutputDir)
+    doLast {
+        def config = new CodegenConfigurator()
+        config.setInputSpec(swaggerInput)
+        config.setOutputDir(swaggerOutputDir.path)
+        config.setLang('java')
+        config.setAdditionalProperties([
+                'invokerPackage': 'com.lykke.client.accounts.http.generated.client',
+                'modelPackage'  : 'com.lykke.client.accounts.http.generated.client.model',
+                'apiPackage'    : 'com.lykke.client.accounts.http.generated.client.api',
+                'dateLibrary'   : 'java8'
+        ])
+        new DefaultGenerator().opts(config.toClientOptInput()).generate()
+    }
+}
+
+clean.doFirst {
+    delete(swaggerOutputDir)
+}
+
+configurations {
+    swagger
+}
+
+sourceSets {
+    swagger {
+        compileClasspath = configurations.swaggerCompile
+        java {
+            srcDir file("${project.buildDir.path}/swagger/src/main/java")
+        }
+    }
+    main {
+        compileClasspath += swagger.output
+        runtimeClasspath += swagger.output
+    }
+    test {
+        compileClasspath += swagger.output
+        runtimeClasspath += swagger.output
+    }
+}
+
+compileSwaggerJava.dependsOn generateApi
+classes.dependsOn swaggerClasses
+compileJava.dependsOn compileSwaggerJava
+
+dependencies {
+    swaggerCompile "io.swagger:swagger-annotations:1.5.16"
+    swaggerCompile "com.squareup.okhttp:okhttp:$rootProject.ext.okhttp_version"
+    swaggerCompile "com.squareup.okhttp:logging-interceptor:$rootProject.ext.okhttp_version"
+    swaggerCompile "com.google.code.gson:gson:$rootProject.ext.gson_version"
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.bitbucket.lykke:kotlin-utils:$rootProject.ext.kotlin_utils_version"
+    compile "com.microsoft.azure:azure-storage:$rootProject.ext.azure_storage_version"
+    compile "com.google.code.gson:gson:$rootProject.ext.gson_version"
+    compile "com.google.protobuf:protobuf-java:$rootProject.ext.protobuf_version"
+
+    runtime "com.squareup.okhttp:okhttp:$rootProject.ext.okhttp_version"
+    runtime "com.squareup.okhttp:logging-interceptor:$rootProject.ext.okhttp_version"
+    runtime "com.google.code.gson:gson:$rootProject.ext.gson_version"
+
+    testCompile  "junit:junit:$rootProject.ext.junit_version"
 }
 
 task javadocJar(type: Jar) {
