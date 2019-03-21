@@ -77,7 +77,7 @@ class ClientAccountsRmqListener(
         return RabbitMqSubscriber(UtilsRabbitMqConfig(
             uri = rabbitMqConfig.uri,
             exchange = rabbitMqConfig.exchange,
-            queue =  rabbitMqConfig.queueName,
+            queue = rabbitMqConfig.queueName,
             connectionTryInterval = null
         ),
             object : Connector {
@@ -86,9 +86,9 @@ class ClientAccountsRmqListener(
                     config.host?.let { factory.host = it }
                     config.port?.let { factory.port = it }
                     config.uri?.let { factory.setUri(it) }
+                    config.username?.let { factory.username = it }
+                    config.password?.let { factory.password = it }
                     factory.setUri(config.uri)
-                    factory.username = config.username
-                    factory.password = config.password
                     factory.requestedHeartbeat = 30
                     factory.isAutomaticRecoveryEnabled = true
 

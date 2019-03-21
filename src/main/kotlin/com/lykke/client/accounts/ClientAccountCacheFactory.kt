@@ -8,7 +8,7 @@ import com.lykke.client.accounts.rabbitmq.RabbitMqListenersFactory
 import java.util.function.Consumer
 
 class ClientAccountCacheFactory {
-    private companion object {
+    companion object {
         val CLIENT_ACCOUNT_CACHE_BY_CONFIG = HashMap<Config, ClientAccountsCacheImpl>()
 
         @Synchronized
