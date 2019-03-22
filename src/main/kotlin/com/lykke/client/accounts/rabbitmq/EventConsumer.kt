@@ -6,7 +6,7 @@ import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import java.util.concurrent.BlockingQueue
 
-class EventConsumer(channel: Channel, val queue: BlockingQueue<ByteArray>): DefaultConsumer(channel) {
+class EventConsumer(channel: Channel, private val queue: BlockingQueue<ByteArray>): DefaultConsumer(channel) {
 
     override fun handleDelivery(
         consumerTag: String?,

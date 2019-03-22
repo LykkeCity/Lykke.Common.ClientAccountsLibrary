@@ -5,11 +5,12 @@ import com.lykke.client.accounts.config.HttpConfig
 import com.lykke.client.accounts.config.RabbitMqConfig
 import com.lykke.client.accounts.loaders.http.HttpWalletsLoaderImpl
 import com.lykke.client.accounts.rabbitmq.RabbitMqListenersFactory
+import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Consumer
 
 class ClientAccountCacheFactory {
     companion object {
-        val CLIENT_ACCOUNT_CACHE_BY_CONFIG = HashMap<Config, ClientAccountsCacheImpl>()
+        private val CLIENT_ACCOUNT_CACHE_BY_CONFIG = HashMap<Config, ClientAccountsCacheImpl>()
 
         @Synchronized
         fun get(config: Config): ClientAccountsCache {
@@ -27,7 +28,7 @@ class ClientAccountCacheFactory {
             RabbitMqListenersFactory.shutdownAll()
         }
 
-        private fun getClientWallets(httpConfig: HttpConfig): Map<String, String> {
+        private fun getClientWallets(httpConfig: HttpConfig): ConcurrentHashMap<String, String> {
             return HttpWalletsLoaderImpl(httpConfig.url, httpConfig.connectionTimeout).loadClientByWalletsMap()
         }
 
@@ -36,7 +37,7 @@ class ClientAccountCacheFactory {
             clientAccountCache: ClientAccountsCacheImpl
         ) {
             val rmqListener = RabbitMqListenersFactory.getListener(rabbitMqConfig)
-            rmqListener.addListener(Consumer {
+            rmqListener.addEventHandler(Consumer {
                 clientAccountCache.add(it.clientId, it.walletId)
             })
         }

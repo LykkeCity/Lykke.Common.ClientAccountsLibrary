@@ -12,7 +12,7 @@ internal class RabbitMqListenersFactory {
         @Synchronized
         fun getListener(config: RabbitMqConfig): ClientAccountsRmqListener {
             return rabbitMqListenersToRabbitMqConfig.getOrPut(config) {
-                ClientAccountsRmqListener(config, ProtoDeserializer())
+                ClientAccountsRmqListener(config, WalletCreatedEventProtoDeserializer())
             }
         }
 
@@ -22,7 +22,7 @@ internal class RabbitMqListenersFactory {
                     it.close()
                 }
                 catch (e: Exception) {
-                    LOGGER.error("Error occurred on RMQ subscriber shutdown", e)
+                    LOGGER.error("Error occurred on client accounts RMQ listener shutdown", e)
                 }
             }
         }

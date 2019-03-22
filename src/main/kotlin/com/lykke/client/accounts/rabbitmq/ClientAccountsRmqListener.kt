@@ -26,42 +26,52 @@ class ClientAccountsRmqListener(
         val LOGGER = ThrottlingLogger.getLogger(ClientAccountsRmqListener::class.java.simpleName)
     }
 
-    private val listeners = CopyOnWriteArrayList<Consumer<WalletCreatedEvent>>()
+    private val eventHandlers = CopyOnWriteArrayList<Consumer<WalletCreatedEvent>>()
     private val eventsQueue: BlockingQueue<ByteArray> = rabbitMqConfig.queue ?: LinkedBlockingQueue<ByteArray>()
     private val rabbitMqSubscriber: RabbitMqSubscriber
+    private val eventProcessingThread: Thread
     private var started = false
 
     init {
         rabbitMqSubscriber = getRabbitMqSubscriber()
-        start()
+        eventProcessingThread = start()
     }
 
-    fun addListener(listener: Consumer<WalletCreatedEvent>) {
-        listeners.add(listener)
+    fun addEventHandler(listener: Consumer<WalletCreatedEvent>) {
+        eventHandlers.add(listener)
     }
 
-    @Synchronized
-    fun start() {
+    fun close() {
+        try {
+            rabbitMqSubscriber.shutdown()
+        } catch (e: Exception) {
+            LOGGER.error("Error occurred while shutting down client accounts RMQ listener", e)
+        }
+        eventProcessingThread.interrupt()
+    }
+
+    private fun start(): Thread {
         if (started) {
             throw IllegalStateException("Client accounts rmq listener already stared")
         }
 
         rabbitMqSubscriber.start()
-        startEventProcessingLoop()
+        val eventProcessingThread = startEventProcessingLoop()
 
         started = true
+
+        return eventProcessingThread
     }
 
-    fun close() {
-        rabbitMqSubscriber.shutdown()
-    }
-
-    private fun startEventProcessingLoop() {
-        thread(name = ClientAccountsRmqListener::class.java.simpleName) {
+    private fun startEventProcessingLoop(): Thread {
+        return thread(name = ClientAccountsRmqListener::class.java.simpleName) {
             while (true) {
+                if (Thread.interrupted()) {
+                    break
+                }
                 val event = eventsQueue.take()
                 val message = messageDeserializer.deserialize(event)
-                listeners.forEach {
+                eventHandlers.forEach {
                     try {
                         it.accept(message)
                     } catch (e: Exception) {
@@ -76,6 +86,11 @@ class ClientAccountsRmqListener(
 
         return RabbitMqSubscriber(UtilsRabbitMqConfig(
             uri = rabbitMqConfig.uri,
+            host = rabbitMqConfig.host,
+            port = rabbitMqConfig.port,
+            username = rabbitMqConfig.username,
+            password = rabbitMqConfig.password,
+
             exchange = rabbitMqConfig.exchange,
             queue = rabbitMqConfig.queueName,
             connectionTryInterval = null
@@ -83,12 +98,11 @@ class ClientAccountsRmqListener(
             object : Connector {
                 override fun createChannel(config: UtilsRabbitMqConfig): Channel {
                     val factory = ConnectionFactory()
+                    config.uri?.let { factory.setUri(it) }
                     config.host?.let { factory.host = it }
                     config.port?.let { factory.port = it }
-                    config.uri?.let { factory.setUri(it) }
                     config.username?.let { factory.username = it }
                     config.password?.let { factory.password = it }
-                    factory.setUri(config.uri)
                     factory.requestedHeartbeat = 30
                     factory.isAutomaticRecoveryEnabled = true
 

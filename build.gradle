@@ -24,7 +24,7 @@ repositories {
 }
 
 ext {
-    kotlin_utils_version = '0.0.12-SNAPSHOT'
+    kotlin_utils_version = '0.0.13-SNAPSHOT'
     azure_storage_version = '4.0.0'
     gson_version = '2.6.2'
     junit_version = '4.12'
@@ -117,6 +117,7 @@ dependencies {
     compile "com.microsoft.azure:azure-storage:$rootProject.ext.azure_storage_version"
     compile "com.google.code.gson:gson:$rootProject.ext.gson_version"
     compile "com.google.protobuf:protobuf-java:$rootProject.ext.protobuf_version"
+
 
     runtime "com.squareup.okhttp:okhttp:$rootProject.ext.okhttp_version"
     runtime "com.squareup.okhttp:logging-interceptor:$rootProject.ext.okhttp_version"

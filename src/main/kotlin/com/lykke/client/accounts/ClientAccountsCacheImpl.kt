@@ -1,12 +1,8 @@
 package com.lykke.client.accounts
 
-class ClientAccountsCacheImpl(initialData: Map<String, String>): ClientAccountsCache {
-    private val clientIdByWalletId = HashMap<String, String>()
+import java.util.concurrent.ConcurrentHashMap
 
-    init {
-        clientIdByWalletId.putAll(initialData)
-    }
-
+class ClientAccountsCacheImpl(private val clientIdByWalletId: ConcurrentHashMap<String, String>): ClientAccountsCache {
     internal fun delete(walletId: String) {
         clientIdByWalletId.remove(walletId)
     }
