@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.lykke.client.accounts.incoming;
+
+option java_package = "com.lykke.client.accounts.incoming";
+option java_outer_classname = "ClientAccountMessages";
+
+message WalletCreatedEvent {
+    string clientId = 1;
+    string walletId = 2;
+    string walletType = 3;
+}
