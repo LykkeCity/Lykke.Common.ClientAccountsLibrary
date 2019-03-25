@@ -126,19 +126,15 @@ dependencies {
     testCompile  "junit:junit:$rootProject.ext.junit_version"
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
+compileKotlin.dependsOn ':generateProto'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
-tasks.withType(Javadoc).all { enabled = false }
 
 artifacts {
-    archives javadocJar, sourcesJar
+    sourcesJar
 }
 
 uploadArchives {
