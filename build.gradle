@@ -137,6 +137,10 @@ artifacts {
     sourcesJar
 }
 
+jar {
+    from sourceSets.swagger.output
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
