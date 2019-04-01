@@ -20,6 +20,7 @@ class HttpWalletsLoaderImpl(url: String, connectionTimeout: Int) : WalletsLoader
         .setConnectTimeout(connectionTimeout))
 
     override fun loadClientByWalletsMap(): ConcurrentHashMap<String, String> {
+        LOGGER.info("Start loading client wallets information")
         val clientsByWallets = ConcurrentHashMap<String, String>()
         var continuationToken = StringUtils.EMPTY
         do {
@@ -30,6 +31,7 @@ class HttpWalletsLoaderImpl(url: String, connectionTimeout: Int) : WalletsLoader
             LOGGER.info("Loaded client wallets ${clientsByWallets.size}")
         } while (StringUtils.isNoneEmpty(continuationToken))
 
+        LOGGER.info("Completed client wallets information loading")
         return clientsByWallets
     }
 
