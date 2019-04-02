@@ -1,5 +1,5 @@
 group 'org.bitbucket.lykke'
-version '1.0.1-SNAPSHOT'
+version '1.0.2-SNAPSHOT'
 
 buildscript {
     ext.kotlin_version = '1.2.10'
@@ -126,7 +126,7 @@ dependencies {
     testCompile  "junit:junit:$rootProject.ext.junit_version"
 }
 
-compileKotlin.dependsOn ':generateProto'
+compileKotlin.dependsOn ':generate{Proto'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
@@ -138,7 +138,7 @@ artifacts {
 }
 
 uploadArchives {
-    repositories {
+    repositories
         mavenDeployer {
 
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {

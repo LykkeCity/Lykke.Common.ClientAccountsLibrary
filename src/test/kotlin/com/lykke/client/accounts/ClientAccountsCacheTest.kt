@@ -12,6 +12,9 @@ class ClientAccountsCacheTest {
             ClientAccountsCacheImpl(ConcurrentHashMap(mapOf("testWallet1" to "Client1", "testWallet2" to "Client2")))
         assertEquals("Client1", clientAccountsCache.getClientByWalletId("testWallet1"))
         assertEquals("Client2", clientAccountsCache.getClientByWalletId("testWallet2"))
+
+        assertEquals(setOf("testWallet1"), clientAccountsCache.getWalletsByClientId("Client1"))
+        assertEquals(setOf("testWallet2"), clientAccountsCache.getWalletsByClientId("Client2"))
     }
 
     @Test
