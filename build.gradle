@@ -126,7 +126,7 @@ dependencies {
     testCompile "junit:junit:$rootProject.ext.junit_version"
 }
 
-compileKotlin.dependsOn ':generate{Proto'
+compileKotlin.dependsOn ':generateProto'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
@@ -142,7 +142,7 @@ jar {
 }
 
 uploadArchives {
-    repositories
+    repositories {
         mavenDeployer {
 
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
