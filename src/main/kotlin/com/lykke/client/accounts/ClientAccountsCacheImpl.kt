@@ -8,7 +8,7 @@ class ClientAccountsCacheImpl(private val clientIdByWalletId: ConcurrentHashMap<
     init {
         clientIdByWalletId.forEach { walletId, clientId ->
             val wallets = walletsByClientId.getOrPut(clientId) { ConcurrentHashMap.newKeySet() }
-            wallets!!.add(walletId)
+            wallets.add(walletId)
         }
     }
 
@@ -21,7 +21,7 @@ class ClientAccountsCacheImpl(private val clientIdByWalletId: ConcurrentHashMap<
     internal fun add(clientId: String, walletId: String) {
         clientIdByWalletId[walletId] = clientId
         val wallets = walletsByClientId.getOrPut(clientId) { ConcurrentHashMap.newKeySet() }
-        wallets!!.add(walletId)
+        wallets.add(walletId)
     }
 
     override fun getClientByWalletId(walletId: String): String? {
