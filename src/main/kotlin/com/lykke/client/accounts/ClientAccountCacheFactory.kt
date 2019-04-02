@@ -38,7 +38,7 @@ class ClientAccountCacheFactory {
         ) {
             val rmqListener = RabbitMqListenersFactory.getListener(rabbitMqConfig)
             rmqListener.addEventHandler(Consumer {
-                clientAccountCache.add(it.clientId, it.walletId)
+                clientAccountCache.addClientWallet(it.clientId, it.walletId)
             })
         }
     }
