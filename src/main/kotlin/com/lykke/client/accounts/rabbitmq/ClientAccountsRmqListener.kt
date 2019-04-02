@@ -8,6 +8,7 @@ import com.lykke.utils.rabbit.ConsumerFactory
 import com.lykke.utils.rabbit.RabbitMqSubscriber
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.ConnectionFactory
+import java.io.Closeable
 import java.lang.Exception
 import java.lang.IllegalStateException
 import java.util.concurrent.BlockingQueue
@@ -20,7 +21,7 @@ import com.lykke.utils.rabbit.RabbitMqConfig as UtilsRabbitMqConfig
 class ClientAccountsRmqListener(
     private val rabbitMqConfig: RabbitMqConfig,
     private val messageDeserializer: Deserializer<WalletCreatedEvent>
-) {
+): Closeable {
 
     private companion object {
         val LOGGER = ThrottlingLogger.getLogger(ClientAccountsRmqListener::class.java.simpleName)
@@ -41,9 +42,9 @@ class ClientAccountsRmqListener(
         eventHandlers.add(listener)
     }
 
-    fun close() {
+    override fun close() {
         try {
-            rabbitMqSubscriber.shutdown()
+            rabbitMqSubscriber.close()
         } catch (e: Exception) {
             LOGGER.error("Error occurred while shutting down client accounts RMQ listener", e)
         }

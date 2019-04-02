@@ -24,7 +24,7 @@ repositories {
 }
 
 ext {
-    kotlin_utils_version = '0.0.13-SNAPSHOT'
+    kotlin_utils_version = '0.0.14-SNAPSHOT'
     azure_storage_version = '4.0.0'
     gson_version = '2.6.2'
     junit_version = '4.12'
@@ -123,7 +123,7 @@ dependencies {
     runtime "com.squareup.okhttp:logging-interceptor:$rootProject.ext.okhttp_version"
     runtime "com.google.code.gson:gson:$rootProject.ext.gson_version"
 
-    testCompile  "junit:junit:$rootProject.ext.junit_version"
+    testCompile "junit:junit:$rootProject.ext.junit_version"
 }
 
 compileKotlin.dependsOn ':generate{Proto'
@@ -135,6 +135,10 @@ task sourcesJar(type: Jar) {
 
 artifacts {
     sourcesJar
+}
+
+jar {
+    from sourceSets.swagger.output
 }
 
 uploadArchives {
